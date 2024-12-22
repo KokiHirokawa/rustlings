@@ -30,23 +30,27 @@ mod my_module {
     pub fn transformer(input: Vec<(String, Command)>) -> Vec<String> {
         let mut output = Vec::new();
 
-        for (s, command) in input {
-            match command {
-                Command::Uppercase => {
-                    output.push(s.to_uppercase());
-                }
-                Command::Trim => {
-                    output.push(s.trim().to_string());
-                }
-                Command::Append(size) => {
-                    let mut s = s;
-                    s.push_str("bar".repeat(size).as_str());
-                    output.push(s);
-                }
-            }
+        for (string, command) in input {
+            let new_string = match command {
+                Command::Uppercase => string.to_uppercase(),
+                Command::Trim => string.trim().to_string(),
+                Command::Append(n) => string + &"bar".repeat(n),
+            };
+            output.push(new_string);
         }
 
         output
+    }
+
+    pub fn transformer_iter(input: Vec<(String, Command)>) -> Vec<String> {
+        input
+            .into_iter()
+            .map(|(string, command)| match command {
+                Command::Uppercase => string.to_uppercase(),
+                Command::Trim => string.trim().to_string(),
+                Command::Append(n) => string + &"bar".repeat(n),
+            })
+            .collect()
     }
 }
 
@@ -58,6 +62,7 @@ fn main() {
 mod tests {
     // TODO: What do we need to import to have `transformer` in scope?
     use super::my_module::transformer;
+    use super::my_module::transformer_iter;
     use super::Command;
 
     #[test]
@@ -68,7 +73,7 @@ mod tests {
             ("foo".to_string(), Command::Append(1)),
             ("bar".to_string(), Command::Append(5)),
         ];
-        let output = transformer(input);
+        let output = transformer_iter(input);
 
         assert_eq!(
             output,
